@@ -41,7 +41,8 @@ pub const ApplicationCommand = struct {
     /// Localization object for `name` field. Values follow the same restrictions as `name`
     name_localizations: ?LocaleMap, //?Localization,
     /// Description for `ApplicationCommandTypes.ChatInput` commands, 1-100 characters.
-    description: ?[]const u8,
+    /// DISCORD API DOCS ARE WRONG, THIS FIELD MUST BE PRESENT
+    description: []const u8,
     /// Localization object for `description` field. Values follow the same restrictions as `description`
     description_localizations: ?LocaleMap, //?Localization,
     /// Parameters for the command, max of 25
