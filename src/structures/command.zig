@@ -15,12 +15,16 @@
 //! PERFORMANCE OF THIS SOFTWARE.
 
 const ApplicationCommandTypes = @import("shared.zig").ApplicationCommandTypes;
+const Locales = @import("shared.zig").Locales;
 const InteractionContextType = @import("integration.zig").InteractionContextType;
 const Snowflake = @import("snowflake.zig").Snowflake;
 const ApplicationCommandPermissionTypes = @import("shared.zig").ApplicationCommandPermissionTypes;
 const ApplicationIntegrationType = @import("application.zig").ApplicationIntegrationType;
 const ApplicationCommandOptionTypes = @import("shared.zig").ApplicationCommandOptionTypes;
 const ChannelTypes = @import("shared.zig").ChannelTypes;
+const JsonType = @import("../json.zig").JsonType;
+const parseInto = @import("../json.zig").parseInto;
+const std = @import("std");
 
 /// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
 pub const ApplicationCommand = struct {
@@ -35,11 +39,11 @@ pub const ApplicationCommand = struct {
     ///
     name: []const u8,
     /// Localization object for `name` field. Values follow the same restrictions as `name`
-    name_localizations: ?[]const u8, //?Localization,
+    name_localizations: ?LocaleMap, //?Localization,
     /// Description for `ApplicationCommandTypes.ChatInput` commands, 1-100 characters.
     description: ?[]const u8,
     /// Localization object for `description` field. Values follow the same restrictions as `description`
-    description_localizations: ?[]const u8, //?Localization,
+    description_localizations: ?LocaleMap, //?Localization,
     /// Parameters for the command, max of 25
     options: ?[]ApplicationCommandOption,
     /// Set of permissions represented as a bit set
@@ -97,11 +101,12 @@ pub const CreateApplicationCommand = struct {
     ///
     name: []const u8,
     /// Localization object for `name` field. Values follow the same restrictions as `name`
-    name_localizations: []const u8, //?Localization,
+    name_localizations: ?LocaleMap, //?Localization,
     /// Description for `ApplicationCommandTypes.ChatInput` commands, 1-100 characters.
-    description: ?[]const u8,
+    /// DISCORD API DOCS ARE WRONG, THIS FIELD MUST BE PRESENT
+    description: []const u8,
     /// Localization object for `description` field. Values follow the same restrictions as `description`
-    description_localizations: []const u8, //?Localization,
+    description_localizations: ?LocaleMap, //?Localization,
     /// Parameters for the command, max of 25
     options: ?[]ApplicationCommandOption,
     /// Set of permissions represented as a bit set
@@ -139,6 +144,48 @@ pub const CreateApplicationCommand = struct {
     /// This can only be set for application commands of type `PRIMARY_ENTRY_POINT` for applications with the `EMBEDDED` flag (i.e. applications that have an Activity).
     ///
     handler: ?InteractionEntryPointCommandHandlerType,
+};
+
+pub const LocaleMap = struct {
+    map: std.EnumMap(Locales, []const u8),
+
+    pub fn init(init_values: std.enums.EnumFieldStruct(Locales, ?[]const u8, @as(?[]const u8, null))) @This() {
+        return .{ .map = .init(init_values) };
+    }
+
+    pub fn jsonStringify(self: *const @This(), jw: anytype) !void {
+        const map = &self.map;
+
+        // Write all fields of the map as a JSON object
+        try jw.beginObject();
+        inline for (std.meta.fields(Locales)) |k| {
+            const key_tag = std.meta.stringToEnum(Locales, k.name).?;
+            if (map.contains(key_tag)) {
+                try jw.objectField(k.name);
+                try jw.write(map.getAssertContains(key_tag));
+            }
+        }
+        try jw.endObject();
+    }
+
+    /// Internal parsing function for zjson
+    pub fn json(allocator: std.mem.Allocator, value: JsonType) !@This() {
+        var map: std.EnumMap(Locales, []const u8) = .{};
+
+        var iterator = value.object.iterator();
+
+        while (iterator.next()) |pair| {
+            const k = pair.key_ptr.*;
+            const v = pair.value_ptr.*;
+
+            defer allocator.free(k);
+            errdefer v.deinit(allocator);
+
+            // TODO: handle when a string received is invalid
+            map.put(std.meta.stringToEnum(Locales, k).?, try parseInto([]const u8, allocator, v));
+        }
+        return .{ .map = map };
+    }
 };
 
 pub const InteractionEntryPointCommandHandlerType = enum(u4) {

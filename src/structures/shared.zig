@@ -1452,7 +1452,7 @@ pub const ImageFormat = union(enum) {
 /// https://discord.com/developers/docs/reference#image-formatting
 pub const ImageSize = isize;
 
-pub const Locales = union(enum) {
+pub const Locales = enum {
     id,
     da,
     de,

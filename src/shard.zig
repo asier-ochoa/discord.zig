@@ -2830,3 +2830,45 @@ pub fn deleteSticker(self: *Self, guild_id: Snowflake, sticker_id: Snowflake) Re
 
     return req.delete(path);
 }
+
+/// Fetch all of the global commands for your application.
+/// Returns an array of application command objects.
+pub fn fetchGlobalApplicationCommands(self: *Self, application_id: Snowflake, with_localizations: ?bool) RequestFailedError!Result([]Types.ApplicationCommand) {
+    var buf: [256]u8 = undefined;
+    const path = try std.fmt.bufPrint(&buf, "/applications/{d}/commands", .{application_id.into()});
+
+    var req = FetchReq.init(self.allocator, self.details.token);
+    defer req.deinit();
+
+    try req.addQueryParam("with_localization", with_localizations);
+
+    return req.get([]Types.ApplicationCommand, path);
+}
+
+/// Create a new global command. Returns 201 if a command with the same
+/// name does not already exist, or a 200 if it does (in which case the previous command will be overwritten).
+/// Both responses include an application command object.
+pub fn createGlobalApplicationCommand(self: *Self, application_id: Snowflake, params: Types.CreateApplicationCommand) RequestFailedError!Result(Types.ApplicationCommand) {
+    var buf: [256]u8 = undefined;
+    const path = try std.fmt.bufPrint(&buf, "/applications/{d}/commands", .{application_id.into()});
+
+    var req = FetchReq.init(self.allocator, self.details.token);
+    defer req.deinit();
+
+    const res = req.post(Types.ApplicationCommand, path, params);
+    return res;
+}
+
+/// Deletes a global command. Returns 204 No Content on success.
+pub fn deleteGlobalApplicationCommand(self: *Self, application_id: Snowflake, command_id: Snowflake) RequestFailedError!Result(void) {
+    var buf: [256]u8 = undefined;
+    const path = try std.fmt.bufPrint(&buf, "/applications/{d}/commands/{d}", .{
+        application_id.into(),
+        command_id.into(),
+    });
+
+    var req = FetchReq.init(self.allocator, self.details.token);
+    defer req.deinit();
+
+    return req.delete(path);
+}

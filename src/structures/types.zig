@@ -172,6 +172,7 @@ pub const CreateChannelInvite = @import("channel.zig").CreateChannelInvite;
 // command.zig
 pub const ApplicationCommand = @import("command.zig").ApplicationCommand;
 pub const CreateApplicationCommand = @import("command.zig").CreateApplicationCommand;
+pub const LocaleMap = @import("command.zig").LocaleMap;
 pub const InteractionEntryPointCommandHandlerType = @import("command.zig").InteractionEntryPointCommandHandlerType;
 pub const ApplicationCommandOption = @import("command.zig").ApplicationCommandOption;
 pub const ApplicationCommandOptionChoice = @import("command.zig").ApplicationCommandOptionChoice;

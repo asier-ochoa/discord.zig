@@ -162,6 +162,7 @@ pub const ModifyGuildChannelPositions = @import("structures/types.zig").ModifyGu
 pub const CreateChannelInvite = @import("structures/types.zig").CreateChannelInvite;
 pub const ApplicationCommand = @import("structures/types.zig").ApplicationCommand;
 pub const CreateApplicationCommand = @import("structures/types.zig").CreateApplicationCommand;
+pub const LocaleMap = @import("structures/types.zig").LocaleMap;
 pub const InteractionEntryPointCommandHandlerType = @import("structures/types.zig").InteractionEntryPointCommandHandlerType;
 pub const ApplicationCommandOption = @import("structures/types.zig").ApplicationCommandOption;
 pub const ApplicationCommandOptionChoice = @import("structures/types.zig").ApplicationCommandOptionChoice;
