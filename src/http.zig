@@ -109,9 +109,14 @@ pub const FetchReq = struct {
     pub fn delete(self: *FetchReq, path: []const u8) !Result(void) {
         const result = try self.makeRequest(.DELETE, path, null);
         if (result.status != .no_content)
-            return try zjson.tryParse(DiscordError, void, self.allocator, try self.body.toOwnedSlice());
+            return try zjson.parseLeft(DiscordError, void, self.allocator, try self.body.toOwnedSlice());
 
-        return .ok({});
+        // TODO: clean up .ok such that it correctly handles not having a .allocator field
+        // Right now accessing arena causes a segfault
+        return .{
+            .arena = @ptrFromInt(@alignOf(std.heap.ArenaAllocator)),
+            .value = zjson.Either(DiscordError, void){ .right = {} },
+        };
     }
 
     pub fn patch(self: *FetchReq, comptime T: type, path: []const u8, object: anytype) !Result(T) {
@@ -213,13 +218,28 @@ pub const FetchReq = struct {
         var string = std.ArrayList(u8).init(fba.allocator());
         errdefer string.deinit();
 
-        try json.stringify(object, .{}, string.writer());
+        try json.stringify(object, .{ .emit_null_optional_fields = false }, string.writer());
+        std.debug.print("sent: {s}\n", .{string.items});
         const result = try self.makeRequest(.POST, path, try string.toOwnedSlice());
 
-        if (result.status != .ok)
-            return try zjson.parseLeft(DiscordError, T, self.allocator, try self.body.toOwnedSlice());
+        std.debug.print("received: {s}\n", .{self.body.items});
 
-        return try zjson.parseRight(DiscordError, T, self.allocator, try self.body.toOwnedSlice());
+        return switch (result.status) {
+            .ok,
+            .created,
+            .accepted,
+            .non_authoritative_info,
+            .no_content,
+            .reset_content,
+            .partial_content,
+            .multi_status,
+            .already_reported,
+            .im_used,
+            => blk: {
+                break :blk try zjson.parseRight(DiscordError, T, self.allocator, try self.body.toOwnedSlice());
+            },
+            else => try zjson.parseLeft(DiscordError, T, self.allocator, try self.body.toOwnedSlice()),
+        };
     }
 
     pub fn post2(self: *FetchReq, comptime T: type, path: []const u8) !Result(T) {

@@ -877,6 +877,10 @@ pub const ApplicationCommandTypes = enum(u4) {
     Message,
     /// A UI-based command that represents the primary way to invoke an app's Activity
     PrimaryEntryPoint,
+
+    pub fn jsonStringify(self: *const @This(), jw: anytype) !void {
+        try jw.print("{d}", .{@intFromEnum(self.*)});
+    }
 };
 
 pub const ApplicationCommandPermissionTypes = enum(u4) {
