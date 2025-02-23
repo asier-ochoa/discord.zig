@@ -2840,7 +2840,7 @@ pub fn fetchGlobalApplicationCommands(self: *Self, application_id: Snowflake, wi
     var req = FetchReq.init(self.allocator, self.details.token);
     defer req.deinit();
 
-    try req.addQueryParam("with_localization", with_localizations);
+    try req.addQueryParam("with_localizations", with_localizations);
 
     return req.get([]Types.ApplicationCommand, path);
 }
