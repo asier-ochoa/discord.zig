@@ -109,7 +109,7 @@ pub const CreateApplicationCommand = struct {
     /// Localization object for `description` field. Values follow the same restrictions as `description`
     description_localizations: ?LocaleMap, //?Localization,
     /// Parameters for the command, max of 25
-    options: ?[]ApplicationCommandOption,
+    options: ?[]const ApplicationCommandOption,
     /// Set of permissions represented as a bit set
     default_member_permissions: ?[]const u8,
     ///
@@ -214,11 +214,11 @@ pub const ApplicationCommandOption = struct {
     ///
     name: []const u8,
     /// Localization object for the `name` field. Values follow the same restrictions as `name`
-    name_localizations: []const u4, //?Localization,
+    name_localizations: ?LocaleMap, //?Localization,
     /// 1-100 character description
     description: []const u8,
     /// Localization object for the `description` field. Values follow the same restrictions as `description`
-    description_localizations: ?[]const u8, //?Localization,
+    description_localizations: ?LocaleMap, //?Localization,
     ///
     /// If the parameter is required or optional. default `false`
     ///

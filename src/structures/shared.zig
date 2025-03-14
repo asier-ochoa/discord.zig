@@ -712,6 +712,10 @@ pub const ApplicationCommandOptionTypes = enum(u4) {
     Mentionable,
     Number,
     Attachment,
+
+    pub fn jsonStringify(self: *const @This(), jw: anytype) !void {
+        try jw.print("{d}", .{@intFromEnum(self.*)});
+    }
 };
 
 /// https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events
@@ -1420,6 +1424,10 @@ pub const InteractionResponseTypes = enum(u4) {
     /// @remarks
     /// Only available for apps with Activities enabled
     LaunchActivity = 12,
+
+    pub fn jsonStringify(self: *const @This(), jw: anytype) !void {
+        try jw.print("{d}", .{@intFromEnum(self.*)});
+    }
 };
 
 pub const SortOrderTypes = enum {
